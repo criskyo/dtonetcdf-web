@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>File Upload</title>
+<link rel="stylesheet" href="../static/css/bootstrap.css"
+	th:href="@{/css/bootstrap.css}">
+</head>
+<body>
+	<div class="container">
+ 		<h2 th:if="${MyVariableDTOList.empty}">no hay datos</h2> 
+ 		<h2 th:if="${!MyVariableDTOList.empty}">Variables</h2> 
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Nombre</th>
+					<th>Descripcion</th>
+					<th>Tipo de Dato</th>
+					<th>Dimenciones</th>
+					<th>Forma</th>
+					<th>Detalle</th>
+				</tr>
+
+			</thead>
+
+			<tbody>
+
+				<tr th:each="myvariabledto : ${MyVariableDTOList}">
+					<td th:text="${myvariabledto.name}">
+					<td th:text="${myvariabledto.descripcion}">
+					<td th:text="${myvariabledto.dataType}">
+					<td th:text="${myvariabledto.dimensions}">
+					<td th:text="${myvariabledto.shape}">
+					<td><a class="btn btn-info" th:href="@{/detalle/{name}(name=${myvariabledto.name})}">Detalle </td>
+				</tr>
+
+			</tbody>
+
+
+		</table>
+	</div>
+</body>
+</html>
