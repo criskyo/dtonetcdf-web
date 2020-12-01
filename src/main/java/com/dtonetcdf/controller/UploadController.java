@@ -33,25 +33,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Controller
 public class UploadController {
 
-    private final String UPLOAD_DIR = "./uploads/";
+	private static final String URL_UPLOAD = "http://localhost:8080/upload";
+	private static final String URL_GET_VARIABLE = "http://localhost:8080/getvariable?name=";
+    private static final String URL_GET_VARIABLES = "http://localhost:8080/getvariables";
+	private final String UPLOAD_DIR = "./uploads/";
+    
 
     @GetMapping("/")
     public String homepage(Model model) {
-    	System.out.println("pase por el index");
         return "index";
     }
     
     @GetMapping("/detalle/{name}")
     public String detalle(@PathVariable("name") String name,  Model model) {
-    	System.out.println("pase por el detalle "+name);
     	RestTemplate restTemplate = new RestTemplate();
-    	String fooResourceUrl
-    	  = "http://localhost:8080/getvariable?name="+name;
+		String fooResourceUrl
+    	  = URL_GET_VARIABLE+name;
     	ResponseEntity<String> response
     	  = restTemplate.getForEntity(fooResourceUrl , String.class);
     	model.addAttribute("detallestring",response.getBody() );
-    	System.out.println("detalle "+response.getBody() );
-    	
         return "detalle";
     }
     
@@ -61,7 +61,7 @@ public class UploadController {
     public String listar(Model model) throws JsonMappingException, JsonProcessingException {
     	RestTemplate restTemplate = new RestTemplate();
     	String fooResourceUrl
-    	  = "http://localhost:8080/getvariables";
+    	  = URL_GET_VARIABLES;
     	ResponseEntity<MyVariableDTO[]> response
     	  = restTemplate.getForEntity(fooResourceUrl, MyVariableDTO[].class);
     	
@@ -75,24 +75,13 @@ public class UploadController {
 
     @PostMapping("/upload")
     public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) throws IOException {
-
-        // check if file is empty
         if (file.isEmpty()) {
-            attributes.addFlashAttribute("message", "Please select a file to upload.");
+            attributes.addFlashAttribute("message", "Porfavor seleccionar un archivo a subir.");
             return "redirect:/";
         }
-
-        // normalize the file path
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
-        // save the file on the local file system
-        
-        	
         	HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            // This nested HttpEntiy is important to create the correct
-            // Content-Disposition entry with metadata "name" and "filename"
             MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
             ContentDisposition contentDisposition = ContentDisposition
                     .builder("form-data")
@@ -104,26 +93,22 @@ public class UploadController {
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", fileEntity);
-            body.add("name", "outN.1");
+            body.add("name", fileName);
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity =
                     new HttpEntity<>(body, headers);
             RestTemplate restTemplate = new RestTemplate();
             try {
                 ResponseEntity<String> response = restTemplate.exchange(
-                		"http://localhost:8080/upload",
+                		URL_UPLOAD,
                         HttpMethod.POST,
                         requestEntity,
                         String.class);
-                
-                System.out.println("response "+response);
             } catch (HttpClientErrorException e) {
                 e.printStackTrace();
             }
-        attributes.addFlashAttribute("message", "You successfully uploaded " + fileName + '!');
-
+        attributes.addFlashAttribute("message", "El archivo " + fileName + " se subio correctamente!");
         return "redirect:/";
-        
     }
     
     
