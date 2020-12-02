@@ -58,16 +58,19 @@ public class UploadController {
     
     
     @GetMapping("/listar")
-    public String listar(Model model) throws JsonMappingException, JsonProcessingException {
+    public String listar(Model model) {
+    try {
     	RestTemplate restTemplate = new RestTemplate();
     	String fooResourceUrl
     	  = URL_GET_VARIABLES;
     	ResponseEntity<MyVariableDTO[]> response
     	  = restTemplate.getForEntity(fooResourceUrl, MyVariableDTO[].class);
-    	
     	List<MyVariableDTO> my = Arrays.asList(response.getBody());
     	model.addAttribute("MyVariableDTOList", my);
-    	System.out.println("pase por aca "+my.toString());
+	} catch (Exception e) {
+		// TODO: handle exception
+	}
+    	
         return "listar";
     }
     
